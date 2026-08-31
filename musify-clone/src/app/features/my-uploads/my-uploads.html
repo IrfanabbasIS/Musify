@@ -1,0 +1,120 @@
+<div class="my-uploads-container">
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="60" color="accent"></mat-spinner>
+    <p class="loading-text">Loading your uploads...</p>
+  </div>
+
+  <div *ngIf="!loading && errorMessage" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button mat-raised-button color="accent" (click)="loadMySongs()">
+      <mat-icon>refresh</mat-icon>
+      Try again
+    </button>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage">
+    <div class="header-section">
+      <h1 class="page-title">My Uploads</h1>
+      <p class="page-subtitle">Songs you've uploaded to Musify</p>
+    </div>
+    <div class="search-section">
+      <div class="search-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search you uploads by song or artist..."
+          [(ngModel)]="searchQuery"
+          
+        />
+
+        <button
+          *ngIf="searchQuery"
+          mat-icon-button
+          class="clear-search-btn"
+          (click)="clearSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-section" *ngIf="songs.length > 0">
+      <div class="songs-header">
+        <h2 class="section-title">
+          {{ totalElements }} {{ totalElements === 1 ? 'song' : 'Songs' }}
+        </h2>
+      </div>
+
+      <div class="songs-list">
+        <div *ngFor="let song of songs; let i = index" class="song-item" (click)="playSong(song)">
+          <div class="song-index">{{ i + 1 }}</div>
+          <div class="song-cover">
+            <img src="" alt="" [src]="song.imageUrl | authImage" [alt]="song.title" />
+            <button mat-icon-button class="play-button-small">
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+          </div>
+
+          <div class="song-info">
+            <h4 class="song-title">{{song.title}}</h4>
+            <p class="song-artist">{{song.artist}}</p>
+          </div>
+          <div class="song-date">
+            <p class="upload-date">{{ song.createdAt | date: 'MMM d, y' }}</p>
+          </div>
+
+          <div class="song-actions">
+            <button
+              mat-icon-button
+              class="add-to-playlist-button"
+              (click)="openAddToPlaylistDialog($event, song)"
+              title="Add to playlist"
+            >
+              <mat-icon>playlist_add</mat-icon>
+            </button>
+
+               <button
+              mat-icon-button
+              class="edit-button-song"
+              (click)="editSong($event, song)"
+              title="Edit song"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+               <button
+              mat-icon-button
+              class="delete-button-song"
+              (click)="deleteSong($event, song)"
+              title="Delete song"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+
+
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-more-container" *ngIf="loadingMore">
+        <mat-spinner diameter="40" color="accent"></mat-spinner>
+        <p class="loading-more-text">Loading more songs...</p>
+      </div>
+
+      <div #scrollTrigger class="scroll-trigger"></div>
+
+      <div class="end-of-list" *ngIf="!hasMoreSongs && !loadingMore">
+        <p>You've reached the end of your uploads</p>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="songs.length===0">
+    <mat-icon class="empty-icon">music_note</mat-icon>
+    <h2>No uploads yet</h2>
+    <p>You haven't uploaded any songs yet. Start sharing your music!</p>
+    </div>
+  </div>
+</div>

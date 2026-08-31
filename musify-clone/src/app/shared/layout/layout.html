@@ -1,0 +1,191 @@
+<div class="layout-container">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" class="logo-icon animate-glow-green">
+        <title>Musify</title>
+
+        <defs>
+          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color: #1ed760; stop-opacity: 1" />
+            <stop offset="100%" style="stop-color: #1db954; stop-opacity: 1" />
+          </linearGradient>
+        </defs>
+
+        <!-- Circular background -->
+        <circle cx="16" cy="16" r="15" fill="url(#logoGradient)" opacity="0.15"></circle>
+
+        <!-- Audio waveform bars -->
+        <rect x="6" y="12" width="2.5" height="8" rx="1.25" fill="url(#logoGradient)" />
+        <rect x="9.5" y="8" width="2.5" height="16" rx="1.25" fill="url(#logoGradient)" />
+        <rect x="13" y="6" width="2.5" height="20" rx="1.25" fill="url(#logoGradient)" />
+        <rect x="16.5" y="8" width="2.5" height="16" rx="1.25" fill="url(#logoGradient)" />
+        <rect x="20" y="12" width="2.5" height="8" rx="1.25" fill="url(#logoGradient)" />
+        <rect x="23.5" y="14" width="2.5" height="4" rx="1.25" fill="url(#logoGradient)" />
+      </svg>
+      <span class="logo-text">Musify</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/home" routerLinkActive="active" class="nav-item">
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </a>
+
+      <a routerLink="/search" routerLinkActive="active" class="nav-item">
+        <mat-icon>search</mat-icon>
+        <span>Search</span>
+      </a>
+      
+
+      <a
+        *ngIf="isAdmin"
+        routerLink="/upload-song"
+        routerLinkActive="active"
+        class="nav-item admin-nav-item"
+      >
+        <mat-icon>upload</mat-icon>
+        <span>Upload Song</span>
+        <span class="admin-indicator">ADMIN</span>
+      </a>
+
+      <a
+        *ngIf="isAdmin"
+        routerLink="/my-uploads"
+        routerLinkActive="active"
+        class="nav-item admin-nav-item"
+      >
+        <mat-icon>cloud_upload</mat-icon>
+        <span>My Uploads</span>
+        <span class="admin-indicator">ADMIN</span>
+      </a>
+    </nav>
+
+    <a routerLink="/create-playlist" routerLinkActive="active" class="nav-item">
+      <mat-icon>add</mat-icon>
+      <span>Create Playlist</span>
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="playlists-header">
+      <h3 class="playlists-title">My Playlists</h3>
+    </div>
+
+    <div class="playlist-search-container">
+      <div class="playlist-search-bar">
+        <mat-icon class="search-icon"></mat-icon>
+        <input
+          type="tex"
+          class="playlist-search-input"
+          placeholder="Search Playlists..."
+          [(ngModel)]="playlistSearchQuery"
+          (keyup.enter)="onSearchPlaylists()"
+        />
+        <button
+          *ngIf="playlistSearchQuery"
+          mat-icon-button
+          class="clear-search-btn"
+          (click)="clearPlaylistSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="playlists-list">
+      <a
+        *ngFor="let playlist of playlists"
+        class="playlist-item"
+        [routerLink]="'/playlist/' + playlist.id"
+      >
+        <div class="playlist-item-thumbnail">
+          <img
+            *ngIf="playlist.imageUrl"
+            [src]="playlist.imageUrl | authImage"
+            [alt]="playlist.name"
+            class="playlist-thumbnail-image"
+          />
+          <mat-icon *ngIf="!playlist.imageUrl" class="playlist-item-icon">library_music</mat-icon>
+        </div>
+        <span class="playlist-name">{{ playlist.name }}</span>
+      </a>
+      <div *ngIf="loadingMorePlaylists && playlists.length > 0" class="playlist-loading">
+        <mat-spinner diameter="24" color="accent"></mat-spinner>
+      </div>
+
+      <div #scrollTriggerPlaylists class="scroll-trigger"></div>
+      <div
+        *ngIf="!hasMorePlaylists && !loadingMorePlaylists && playlists.length > 0"
+        class="playlist-end"
+      >
+        <p>All playlists loaded</p>
+      </div>
+
+      <div *ngIf="playlists.length === 0 && !loadingMorePlaylists" class="empty-playlists">
+        <p *ngIf="playlistSearchQuery">No playlists found</p>
+        <p *ngIf="!playlistSearchQuery">No playlists yet. Create your first playlist!</p>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="navbar">
+      <div class="nav-buttons"></div>
+      <div class="user-menu-container" [class.expanded]="isUserMenuExpanded">
+        <button
+          mat-icon
+          class="user-profile-btn"
+          [class.admin-user]="isAdmin"
+          (click)="toggleUserMenu()"
+        >
+          <!-- <span class="menu-text" *ngIf="isUserMenuExpanded">Menu</span> -->
+          <mat-icon class="user-icon">account_circle</mat-icon>
+          <span class="user-name-text">{{ userName }}</span>
+          <span class="user-badge" [class.admin-badge]="isAdmin">{{
+            isAdmin ? 'ADMIN' : 'USER'
+          }}</span>
+          <mat-icon class="dropdown-icon" [class.rotated]="isUserMenuExpanded"
+            >arrow_drop_down</mat-icon
+          >
+        </button>
+
+        <div
+          class="user-menu-expanded"
+          [@expandCollapse]="isUserMenuExpanded ? 'expanded' : 'collapsed'"
+        >
+          <button
+            mat-icon
+            routerLink="/profile"
+            class="menu-item-expanded"
+            (click)="toggleUserMenu()"
+          >
+            <mat-icon>account_circle</mat-icon>
+            <span>Profile</span>
+          </button>
+
+          <button
+            *ngIf="isAdmin"
+            mat-icon
+            routerLink="/all-users"
+            class="menu-item-expanded"
+            (click)="toggleUserMenu()"
+          >
+            <mat-icon>people</mat-icon>
+            <span>All Users</span>
+          </button>
+          <div class="menu-divider"></div>
+          <button mat-button (click)="logout()" class="menu-item-expanded logout-item">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <app-music-player></app-music-player>
+
+  <app-expanded-player></app-expanded-player>
+</div>
