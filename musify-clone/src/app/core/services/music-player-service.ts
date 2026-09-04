@@ -8,7 +8,7 @@ export type ReapeatMode = 'off' | 'all' | 'one';
 @Injectable({
   providedIn: 'root',
 })
-export class MusicPlayerService implements OnDestroy{
+export class MusicPlayerService implements OnDestroy {
   private authHttpService = inject(AuthHttpService);
   private audio: HTMLAudioElement;
   private currentSongSubject = new BehaviorSubject<Song | null>(null);
@@ -90,25 +90,70 @@ export class MusicPlayerService implements OnDestroy{
 
       try {
         await this.loadAudioFromUrl(song.songUrl);
-         console.log('Audio loaded:', song.title);
+        console.log('Audio loaded:', song.title);
         this.play();
       } catch (error) {
         console.error('FAILED TO LOAD SONG:', song);
-  console.error('songUrl:', song.songUrl);
-  console.error('ERROR:', error);
+        console.error('songUrl:', song.songUrl);
+        console.error('ERROR:', error);
         this.currentSongSubject.next(null);
         this.isPlayingSubject.next(false);
       }
     }
   }
 
+  //old local url method
+  // private async loadAudioFromUrl(url: string): Promise<void> {
+  //   if (this.currentBlobUrl) {
+  //     URL.revokeObjectURL(this.currentBlobUrl);
+  //     this.currentBlobUrl = null;
+  //   }
+
+  //   const blob = await this.authHttpService.fetcBlob(url);
+  //   const blobUrl = URL.createObjectURL(blob);
+
+  //   this.currentBlobUrl = blobUrl;
+  //   this.audio.src = blobUrl;
+  //   return new Promise((resolve, reject) => {
+  //     const onCanPlay = () => {
+  //       this.audio.removeEventListener('canplay', onCanPlay);
+  //       this.audio.removeEventListener('error', onError);
+  //       resolve();
+  //     };
+
+  //     const onError = () => {
+  //       this.audio.removeEventListener('canplay', onCanPlay);
+  //       this.audio.removeEventListener('error', onError);
+  //       reject(new Error('Failed to load audio'));
+  //     };
+
+  //     this.audio.addEventListener('canplay', onCanPlay);
+  //     this.audio.addEventListener('error', onError);
+  //     this.audio.load();
+  //   });
+  // }
+
+  //new cloudinary compatible method
   private async loadAudioFromUrl(url: string): Promise<void> {
     if (this.currentBlobUrl) {
       URL.revokeObjectURL(this.currentBlobUrl);
       this.currentBlobUrl = null;
     }
 
-    const blob = await this.authHttpService.fetcBlob(url);
+    let blob: Blob;
+
+    if (url.startsWith('http') && !url.includes('/api/file/')) {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch audio: ${response.status}`);
+      }
+
+      blob = await response.blob();
+    } else {
+      blob = await this.authHttpService.fetcBlob(url);
+    }
+
     const blobUrl = URL.createObjectURL(blob);
 
     this.currentBlobUrl = blobUrl;
@@ -137,7 +182,6 @@ export class MusicPlayerService implements OnDestroy{
     if (this.audio.src) {
       this.audio.play().catch((error) => {
         console.error('Error playing audio:', error);
-        
       });
     }
   }
@@ -312,46 +356,39 @@ export class MusicPlayerService implements OnDestroy{
   }
 
   toggleRepeat() {
-    const currentMode=this.repeatModeSubject.value;
-    let newMode:ReapeatMode;
-    if(currentMode==='off')
-    {
-      newMode='all';
-    }
-    else if(currentMode==='all')
-    {
-      newMode='one';
-    }
-    else
-    {
-      newMode='off';
+    const currentMode = this.repeatModeSubject.value;
+    let newMode: ReapeatMode;
+    if (currentMode === 'off') {
+      newMode = 'all';
+    } else if (currentMode === 'all') {
+      newMode = 'one';
+    } else {
+      newMode = 'off';
     }
     this.repeatModeSubject.next(newMode);
   }
 
-  getRepeatMode():ReapeatMode{
+  getRepeatMode(): ReapeatMode {
     return this.repeatModeSubject.value;
   }
 
-  toggleExpanded():void{
-    const currentExpanded=this.isExpandedSubject.value;
+  toggleExpanded(): void {
+    const currentExpanded = this.isExpandedSubject.value;
     this.isExpandedSubject.next(!currentExpanded);
   }
 
-  setExpanded(expanded:boolean)
-  {
+  setExpanded(expanded: boolean) {
     this.isExpandedSubject.next(expanded);
   }
 
-  isExpanded():boolean{
+  isExpanded(): boolean {
     return this.isExpandedSubject.value;
   }
 
   ngOnDestroy(): void {
-      if(this.currentBlobUrl)
-      {
-        URL.revokeObjectURL(this.currentBlobUrl);
-        this.currentBlobUrl=null;
-      }
+    if (this.currentBlobUrl) {
+      URL.revokeObjectURL(this.currentBlobUrl);
+      this.currentBlobUrl = null;
+    }
   }
 }
