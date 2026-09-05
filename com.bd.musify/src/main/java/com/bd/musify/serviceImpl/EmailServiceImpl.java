@@ -81,7 +81,7 @@ public class EmailServiceImpl  implements EmailService
         catch(Exception ex)
         {
             logger.error("Failed to sent welcome email t0{}:{}", toEmail, ex.getMessage(),ex);
-            throw new RuntimeException("Failed to send welcom email");
+            throw new RuntimeException("Failed to send welcom email", ex);
         }
     }
     
