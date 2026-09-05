@@ -51,7 +51,7 @@ public class PlaylistWithSongResponse {
         response.setName(playlist.getName());
         response.setDescription(playlist.getDescription());
         response.setIsPublic(playlist.getIsPublic());
-        response.setImageUrl(playlist.getImageUrl() != null ? baseUrl + playlist.getImageUrl() : null);
+        response.setImageUrl(playlist.getImageUrl());
         response.setCreateAt(playlist.getCreatedAt());
         response.setUpdateAt(playlist.getUpdatedAt());
         response.setAppUserId(playlist.getAppUser().getId());
@@ -65,12 +65,9 @@ public class PlaylistWithSongResponse {
                     songResponse.setTitle(ps.getSong().getTitle());
                     songResponse.setArtist(ps.getSong().getArtist());
                     songResponse
-                            .setSongurl(ps.getSong().getSongUrl() != null ? baseUrl + ps.getSong().getSongUrl() : null);
-                            songResponse.setImageUrl(
-        ps.getSong().getImageUrl() != null
-            ? baseUrl + ps.getSong().getImageUrl()
-            : null
-    );
+                            .setSongurl(ps.getSong().getSongUrl());
+                    songResponse.setImageUrl(
+                            ps.getSong().getImageUrl());
                     songResponse.setPosition(ps.getPosition());
                     songResponse.setAddedAt(ps.getAddedAt());
                     return songResponse;

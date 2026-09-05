@@ -31,7 +31,7 @@ public class PlaylistResponse {
          response.setName(playlist.getName());
           response.setDescription(playlist.getDescription());
            response.setIsPublic(playlist.getIsPublic());
-            response.setImageUrl(playlist.getImageUrl()!=null ? baseUrl + playlist.getImageUrl():null);
+            response.setImageUrl(playlist.getImageUrl());
              response.setCreateAt(playlist.getCreatedAt());
               response.setUpdateAt(playlist.getUpdatedAt ());
                response.setAppUserId(playlist.getAppUser().getId());
